@@ -1,0 +1,8 @@
+[
+  { "cat": "طباعة خارجية", "title": "لوحة إعلانية", "icon": "billboard", "size": "tall", "image": "/1.png" },
+  { "cat": "طباعة داخلية", "title": "ملصقات حائط", "icon": "printer", "size": "wide", "image": "/2.png" },
+  { "cat": "هوية بصرية", "title": "تصميم شعار", "icon": "palette", "size": "normal", "image": "/3.png" },
+  { "cat": "لوحات إعلانية", "title": "واجهة متجر", "icon": "curtain", "size": "normal", "image": "/6.png" },
+  { "cat": "شاشات رقمية", "title": "شاشة LED", "icon": "storefront", "size": "wide", "image": "/4.png" },
+  { "cat": "تغليف مركبات", "title": "سيارة توصيل", "icon": "van", "size": "normal", "image": "/5.png" }
+]

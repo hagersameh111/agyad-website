@@ -1,0 +1,230 @@
+import React, { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { PROJECT_DETAILS } from "../data/projectdetail.js";
+import { getIconComponent } from "../utils/iconMap.jsx";
+import { IconChevron, IconShare, IconSend, IconPlay, IconCheck } from "../components/icons.jsx";
+
+function GalleryTile({ icon, label, area }) {
+  const Ic = getIconComponent(icon);
+  return (
+    <div
+      style={{ gridArea: area }}
+      className="relative overflow-hidden border border-gray-200 bg-gray-50 flex flex-col items-center justify-center text-center p-5 rounded-xl hover:bg-white hover:border-red-200 hover:shadow-sm transition-all duration-300 group"
+    >
+      <Ic className="w-7 h-7 text-red-700 group-hover:scale-110 transition-transform" />
+      <p className="text-gray-600 text-xs mt-3 font-medium">{label}</p>
+    </div>
+  );
+}
+
+function InfoTable({ rows }) {
+  return (
+    <div className="divide-y divide-gray-100">
+      {rows.map((r, i) => (
+        <div key={i} className="flex items-start justify-between gap-6 py-3 text-sm">
+          <span className="text-gray-500 shrink-0">{r.label}</span>
+          <span className="text-gray-900 font-medium text-right">{r.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function NotFound() {
+  return (
+    <div dir="rtl" lang="ar" className="min-h-screen flex items-center justify-center bg-gray-50 text-center px-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-3">لم يتم العثور على المشروع</h1>
+        <p className="text-gray-500 mb-8">قد يكون الرابط غير صحيح أو أن المشروع لم يعد متاحاً.</p>
+        <Link
+          to="/projects"
+          className="inline-flex items-center gap-2 bg-red-700 text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-red-800 transition-colors"
+        >
+          العودة لكل المشاريع
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default function ProjectDetail() {
+  const { id } = useParams();
+  const D = PROJECT_DETAILS[id];
+
+  const [sent, setSent] = useState(false);
+  const submit = (e) => {
+    e.preventDefault();
+    setSent(true);
+  };
+
+  if (!D) return <NotFound />;
+
+  return (
+    <div dir="rtl" lang="ar" className="bg-gray-50 min-h-screen font-sans text-gray-900">
+      {/* Top bar: breadcrumb + actions */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-4 flex flex-wrap items-center justify-between gap-4">
+          <p className="text-sm text-gray-500 font-medium">
+            <Link to="/projects" className="hover:text-red-700 transition-colors">
+              {D.breadcrumbParent}
+            </Link>
+            <span className="mx-3 text-gray-300">/</span>
+            <span className="text-gray-900">{D.breadcrumbCurrent}</span>
+          </p>
+          <div className="flex gap-3">
+            <button className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-lg hover:border-red-300 hover:text-red-700 hover:bg-gray-50 transition-colors">
+              <IconShare className="w-4 h-4" /> {D.shareLabel}
+            </button>
+            <button className="inline-flex items-center gap-2 bg-red-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-red-800 transition-colors shadow-sm">
+              {D.inquireLabel}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-6 md:px-10 py-12">
+        <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-10 tracking-tight">
+          {D.title}
+        </h1>
+
+        {/* Gallery Section */}
+        <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 mb-8 shadow-sm">
+          <h2 className="text-sm font-semibold text-red-700 mb-1.5 uppercase tracking-wide">
+            {D.galleryHeading}
+          </h2>
+          <p className="text-gray-500 text-sm mb-6 max-w-2xl leading-relaxed">
+            {D.gallerySubtitle}
+          </p>
+
+          <div
+            className="grid gap-3 sm:gap-4"
+            style={{
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gridTemplateRows: "160px 160px 130px",
+              gridTemplateAreas: `"b b a a" "b b c c" "d e . ."`,
+            }}
+          >
+            {D.gallery.map((g, i) => (
+              <GalleryTile key={i} {...g} />
+            ))}
+          </div>
+        </section>
+
+        <div className="grid lg:grid-cols-12 gap-8">
+          {/* Main Content Column */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* Client Info + Overview */}
+            <div className="grid sm:grid-cols-2 gap-6">
+              <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <h3 className="text-sm font-semibold text-red-700 mb-2 uppercase tracking-wide">
+                  {D.clientHeading}
+                </h3>
+                <p className="text-gray-500 text-xs leading-relaxed mb-5">
+                  {D.clientIntro}
+                </p>
+                <InfoTable rows={D.client} />
+              </section>
+
+              <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <h3 className="text-sm font-semibold text-red-700 mb-2 uppercase tracking-wide">
+                  {D.overviewHeading}
+                </h3>
+                <p className="text-gray-500 text-xs leading-relaxed mb-5">
+                  {D.overviewIntro}
+                </p>
+                <InfoTable rows={D.overview} />
+              </section>
+            </div>
+
+            {/* Story */}
+            <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+              <h3 className="text-sm font-semibold text-red-700 mb-4 uppercase tracking-wide">
+                {D.storyHeading}
+              </h3>
+              <p className="text-gray-600 text-sm leading-loose whitespace-pre-line">
+                {D.story}
+              </p>
+            </section>
+
+            {/* Achievements */}
+            <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+              <h3 className="text-sm font-semibold text-red-700 mb-5 uppercase tracking-wide">
+                {D.achievementsHeading}
+              </h3>
+              <ul className="space-y-4">
+                {D.achievements.map((a, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-gray-700 bg-gray-50 p-4 rounded-xl border border-gray-100 hover:border-red-100 transition-colors">
+                    <div className="bg-white p-1 rounded-full border border-red-200 shrink-0 shadow-sm mt-0.5">
+                      <IconCheck className="w-3.5 h-3.5 text-red-700" />
+                    </div>
+                    <span className="leading-relaxed font-medium">{a}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-4 space-y-8">
+            {/* Contact Box */}
+            <section className="bg-red-700 text-white rounded-2xl p-6 md:p-8 shadow-lg relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full blur-3xl -translate-y-10 translate-x-10 pointer-events-none"></div>
+
+              <p className="text-xs text-red-200 font-semibold tracking-wider uppercase mb-2">التواصل</p>
+              <h3 className="text-2xl font-medium mb-3">{D.contactHeading}</h3>
+              <p className="text-sm text-red-100 leading-relaxed mb-6">{D.contactBody}</p>
+
+              <form onSubmit={submit} className="space-y-4 relative z-10">
+                <div>
+                  <label className="block text-xs text-red-200 mb-2 font-medium">البريد الإلكتروني</label>
+                  <input
+                    type="email"
+                    defaultValue={D.contact.email}
+                    className="w-full bg-red-800/50 border border-red-600 rounded-lg px-4 py-3 text-sm text-white placeholder:text-red-300 outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-red-200 mb-2 font-medium">الهاتف</label>
+                  <input
+                    type="text"
+                    defaultValue={D.contact.phone}
+                    className="w-full bg-red-800/50 border border-red-600 rounded-lg px-4 py-3 text-sm text-white placeholder:text-red-300 outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-white text-red-800 py-3.5 rounded-lg text-sm font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 mt-2"
+                >
+                  {sent ? "تم الإرسال بنجاح" : (
+                    <>
+                      {D.sendLabel} <IconSend className="w-4 h-4 rtl:rotate-180" />
+                    </>
+                  )}
+                </button>
+                <p className="text-xs text-red-200 text-center mt-4">{D.contact.note}</p>
+              </form>
+            </section>
+
+            {/* Deliverables List */}
+            <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+              <h3 className="text-sm font-semibold text-red-700 mb-2 uppercase tracking-wide">
+                {D.deliverablesHeading}
+              </h3>
+              <p className="text-gray-500 text-xs leading-relaxed mb-5">
+                {D.deliverablesSubtitle}
+              </p>
+              <ul className="space-y-3">
+                {D.deliverables.map((d, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm text-gray-700 font-medium">
+                    <IconChevron className="w-4 h-4 text-red-600 rotate-180 shrink-0" />
+                    <span>{d}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

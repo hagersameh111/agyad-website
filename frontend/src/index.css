@@ -1,0 +1,120 @@
+@import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;900&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Tajawal", sans-serif;
+  --font-serif: "Amiri", serif;
+
+  /* ---- Bab Ajyad brand palette (from the brochure design) ----
+     ink*      = deep burgundy surfaces (cover / dark sections)
+     oxblood*  = brand burgundy (text & accents on white)
+     gild*     = bright burgundy-red accent (buttons, highlights)
+     stone     = light warm gray text on burgundy
+     silver    = brand gray (shapes in the brochure)
+     charcoal  = body text on white                              */
+  --color-ink: #4a0b1a;
+  --color-ink-soft: #5f1024;
+  --color-ink-line: #7d2a3e;
+
+  --color-oxblood: #8e1b31;
+  --color-oxblood-soft: #a32340;
+  --color-oxblood-deep: #5f0f20;
+
+  --color-gild: #b3223f;
+  --color-gild-bright: #e8556f;
+  --color-gild-dim: #8e1b31;
+
+  --color-parchment: #ffffff;
+  --color-parchment-soft: #f3f3f4;
+
+  --color-stone: #d3cdcf;
+  --color-silver: #8c8c91;
+  --color-silver-light: #e6e6e8;
+  --color-charcoal: #2b2b2e;
+}
+
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html {
+  scroll-padding-top: 96px;
+  scroll-behavior: smooth;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  background: #4a0b1a;
+  margin: 0;
+  font-family: "Tajawal", sans-serif;
+}
+.font-serif {
+  font-family: "Amiri", serif;
+}
+.font-sans {
+  font-family: "Tajawal", sans-serif;
+}
+
+.lattice {
+  background-image: url("data:image/svg+xml,%3Csvg width='140' height='140' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23E8556F' stroke-width='1' opacity='0.35'%3E%3Crect x='38' y='38' width='64' height='64'/%3E%3Crect x='38' y='38' width='64' height='64' transform='rotate(45 70 70)'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+.lattice-soft {
+  background-image: url("data:image/svg+xml,%3Csvg width='140' height='140' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%237D2A3E' stroke-width='1' opacity='0.7'%3E%3Crect x='38' y='38' width='64' height='64'/%3E%3Crect x='38' y='38' width='64' height='64' transform='rotate(45 70 70)'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+.hairline {
+  background: linear-gradient(90deg, transparent, #e8556f 15%, #e8556f 85%, transparent);
+  height: 1px;
+}
+.clip-corner {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+}
+.clip-corner-sm {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+}
+::selection {
+  background: #b3223f;
+  color: #ffffff;
+}
+.underline-grow {
+  position: relative;
+}
+.underline-grow::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  width: 0;
+  background: #b3223f;
+  transition: width 0.35s ease;
+}
+.underline-grow:hover::after {
+  width: 100%;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #d3cdcf;
+  opacity: 0.7;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+/* Brochure-style angled corner shapes */
+.shape-burgundy {
+  background: #8e1b31;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+.shape-gray {
+  background: #8c8c91;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+.cut-corner {
+  clip-path: polygon(0 0, calc(100% - 28px) 0, 100% 28px, 100% 100%, 28px 100%, 0 calc(100% - 28px));
+}
