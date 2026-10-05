@@ -1,21 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { PROJECT_DETAILS } from "../data/projectdetail.js";
-import { getIconComponent } from "../utils/iconMap.jsx";
-import { IconChevron, IconShare, IconSend, IconPlay, IconCheck } from "../components/icons.jsx";
-
-function GalleryTile({ icon, label, area }) {
-  const Ic = getIconComponent(icon);
-  return (
-    <div
-      style={{ gridArea: area }}
-      className="relative overflow-hidden border border-gray-200 bg-gray-50 flex flex-col items-center justify-center text-center p-5 rounded-xl hover:bg-white hover:border-red-200 hover:shadow-sm transition-all duration-300 group"
-    >
-      <Ic className="w-7 h-7 text-red-700 group-hover:scale-110 transition-transform" />
-      <p className="text-gray-600 text-xs mt-3 font-medium">{label}</p>
-    </div>
-  );
-}
+import { fetchProjectById } from "../services/api.js";
+import { IconChevron, IconShare, IconSend, IconCheck } from "../components/icons.jsx";
 
 function InfoTable({ rows }) {
   return (
@@ -49,15 +35,44 @@ function NotFound() {
 
 export default function ProjectDetail() {
   const { id } = useParams();
-  const D = PROJECT_DETAILS[id];
-
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [sent, setSent] = useState(false);
+
+  useEffect(() => {
+    const loadProject = async () => {
+      const data = await fetchProjectById(id);
+      setProject(data);
+      setLoading(false);
+    };
+    loadProject();
+  }, [id]);
+
   const submit = (e) => {
     e.preventDefault();
     setSent(true);
   };
 
-  if (!D) return <NotFound />;
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-red-700">جاري التحميل...</div>;
+  }
+
+  if (!project) return <NotFound />;
+
+  // Map backend clientInfo to the table rows format
+  const clientRows = project.clientInfo ? [
+    { label: "العميل", value: project.clientInfo.client },
+    { label: "مدير العلامة", value: project.clientInfo.brandManager },
+    { label: "القطاع", value: project.clientInfo.category },
+    { label: "المنطقة", value: project.clientInfo.region },
+  ].filter(r => r.value) : [];
+
+  const overviewRows = project.clientInfo ? [
+    { label: "تاريخ الإطلاق", value: project.clientInfo.launchWindow },
+    { label: "المدة الزمنية", value: project.clientInfo.duration },
+    { label: "القنوات", value: project.clientInfo.channels },
+    { label: "الهدف الرئيسي", value: project.clientInfo.mainObjective },
+  ].filter(r => r.value) : [];
 
   return (
     <div dir="rtl" lang="ar" className="bg-gray-50 min-h-screen font-sans text-gray-900">
@@ -65,49 +80,47 @@ export default function ProjectDetail() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 md:px-10 py-4 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-gray-500 font-medium">
-            <Link to="/projects" className="hover:text-red-700 transition-colors">
-              {D.breadcrumbParent}
-            </Link>
+            <Link to="/projects" className="hover:text-red-700 transition-colors">المشاريع</Link>
             <span className="mx-3 text-gray-300">/</span>
-            <span className="text-gray-900">{D.breadcrumbCurrent}</span>
+            <span className="text-gray-900">{project.title}</span>
           </p>
           <div className="flex gap-3">
             <button className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-lg hover:border-red-300 hover:text-red-700 hover:bg-gray-50 transition-colors">
-              <IconShare className="w-4 h-4" /> {D.shareLabel}
+              <IconShare className="w-4 h-4" /> مشاركة
             </button>
-            <button className="inline-flex items-center gap-2 bg-red-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-red-800 transition-colors shadow-sm">
-              {D.inquireLabel}
-            </button>
+            <a href="#contact-box" className="inline-flex items-center gap-2 bg-red-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-red-800 transition-colors shadow-sm">
+              طلب استشارة
+            </a>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 md:px-10 py-12">
-        <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-10 tracking-tight">
-          {D.title}
+        <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2 tracking-tight">
+          {project.title}
         </h1>
+        {project.subtitle && (
+          <p className="text-lg text-gray-500 mb-10">{project.subtitle}</p>
+        )}
 
         {/* Gallery Section */}
         <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 mb-8 shadow-sm">
           <h2 className="text-sm font-semibold text-red-700 mb-1.5 uppercase tracking-wide">
-            {D.galleryHeading}
+            معرض الوسائط
           </h2>
           <p className="text-gray-500 text-sm mb-6 max-w-2xl leading-relaxed">
-            {D.gallerySubtitle}
+            {project.videoPlaceholder}
           </p>
 
-          <div
-            className="grid gap-3 sm:gap-4"
-            style={{
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gridTemplateRows: "160px 160px 130px",
-              gridTemplateAreas: `"b b a a" "b b c c" "d e . ."`,
-            }}
-          >
-            {D.gallery.map((g, i) => (
-              <GalleryTile key={i} {...g} />
-            ))}
-          </div>
+          {project.images && project.images.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {project.images.map((img, i) => (
+                <div key={i} className="aspect-[4/3] bg-gray-100 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                  <img src={img} alt={`${project.title} - ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <div className="grid lg:grid-cols-12 gap-8">
@@ -116,70 +129,86 @@ export default function ProjectDetail() {
             {/* Client Info + Overview */}
             <div className="grid sm:grid-cols-2 gap-6">
               <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h3 className="text-sm font-semibold text-red-700 mb-2 uppercase tracking-wide">
-                  {D.clientHeading}
+                <h3 className="text-sm font-semibold text-red-700 mb-4 uppercase tracking-wide">
+                  تفاصيل العميل
                 </h3>
-                <p className="text-gray-500 text-xs leading-relaxed mb-5">
-                  {D.clientIntro}
-                </p>
-                <InfoTable rows={D.client} />
+                <InfoTable rows={clientRows} />
               </section>
 
               <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                <h3 className="text-sm font-semibold text-red-700 mb-2 uppercase tracking-wide">
-                  {D.overviewHeading}
+                <h3 className="text-sm font-semibold text-red-700 mb-4 uppercase tracking-wide">
+                  نظرة عامة
                 </h3>
-                <p className="text-gray-500 text-xs leading-relaxed mb-5">
-                  {D.overviewIntro}
-                </p>
-                <InfoTable rows={D.overview} />
+                <InfoTable rows={overviewRows} />
               </section>
             </div>
 
-            {/* Story */}
+            {/* Story & Overview Text */}
             <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
               <h3 className="text-sm font-semibold text-red-700 mb-4 uppercase tracking-wide">
-                {D.storyHeading}
+                قصة المشروع
               </h3>
+              <p className="text-gray-600 text-sm leading-loose whitespace-pre-line mb-6">
+                {project.overview}
+              </p>
               <p className="text-gray-600 text-sm leading-loose whitespace-pre-line">
-                {D.story}
+                {project.story}
               </p>
             </section>
 
-            {/* Achievements */}
-            <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-              <h3 className="text-sm font-semibold text-red-700 mb-5 uppercase tracking-wide">
-                {D.achievementsHeading}
-              </h3>
-              <ul className="space-y-4">
-                {D.achievements.map((a, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-gray-700 bg-gray-50 p-4 rounded-xl border border-gray-100 hover:border-red-100 transition-colors">
-                    <div className="bg-white p-1 rounded-full border border-red-200 shrink-0 shadow-sm mt-0.5">
-                      <IconCheck className="w-3.5 h-3.5 text-red-700" />
-                    </div>
-                    <span className="leading-relaxed font-medium">{a}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            {/* Achievements / Results */}
+            {project.results && project.results.length > 0 && (
+              <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <h3 className="text-sm font-semibold text-red-700 mb-5 uppercase tracking-wide">
+                  النتائج والإنجازات
+                </h3>
+                <ul className="space-y-4">
+                  {project.results.map((a, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-gray-700 bg-gray-50 p-4 rounded-xl border border-gray-100 hover:border-red-100 transition-colors">
+                      <div className="bg-white p-1 rounded-full border border-red-200 shrink-0 shadow-sm mt-0.5">
+                        <IconCheck className="w-3.5 h-3.5 text-red-700" />
+                      </div>
+                      <span className="leading-relaxed font-medium">{a}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-4 space-y-8">
+            
+            {/* Deliverables List */}
+            {project.deliverables && project.deliverables.length > 0 && (
+              <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <h3 className="text-sm font-semibold text-red-700 mb-5 uppercase tracking-wide">
+                  المخرجات والخدمات
+                </h3>
+                <ul className="space-y-3">
+                  {project.deliverables.map((d, i) => (
+                    <li key={i} className="flex items-center gap-3 text-sm text-gray-700 font-medium">
+                      <IconChevron className="w-4 h-4 text-red-600 rotate-180 shrink-0" />
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             {/* Contact Box */}
-            <section className="bg-red-700 text-white rounded-2xl p-6 md:p-8 shadow-lg relative overflow-hidden">
+            <section id="contact-box" className="bg-red-700 text-white rounded-2xl p-6 md:p-8 shadow-lg relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full blur-3xl -translate-y-10 translate-x-10 pointer-events-none"></div>
 
               <p className="text-xs text-red-200 font-semibold tracking-wider uppercase mb-2">التواصل</p>
-              <h3 className="text-2xl font-medium mb-3">{D.contactHeading}</h3>
-              <p className="text-sm text-red-100 leading-relaxed mb-6">{D.contactBody}</p>
+              <h3 className="text-2xl font-medium mb-3">هل ترغب في مشروع مشابه؟</h3>
+              <p className="text-sm text-red-100 leading-relaxed mb-6">تواصل معنا لمناقشة التفاصيل وبناء نجاحك القادم.</p>
 
               <form onSubmit={submit} className="space-y-4 relative z-10">
                 <div>
                   <label className="block text-xs text-red-200 mb-2 font-medium">البريد الإلكتروني</label>
                   <input
                     type="email"
-                    defaultValue={D.contact.email}
                     className="w-full bg-red-800/50 border border-red-600 rounded-lg px-4 py-3 text-sm text-white placeholder:text-red-300 outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
                   />
                 </div>
@@ -187,7 +216,6 @@ export default function ProjectDetail() {
                   <label className="block text-xs text-red-200 mb-2 font-medium">الهاتف</label>
                   <input
                     type="text"
-                    defaultValue={D.contact.phone}
                     className="w-full bg-red-800/50 border border-red-600 rounded-lg px-4 py-3 text-sm text-white placeholder:text-red-300 outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
                   />
                 </div>
@@ -197,31 +225,13 @@ export default function ProjectDetail() {
                 >
                   {sent ? "تم الإرسال بنجاح" : (
                     <>
-                      {D.sendLabel} <IconSend className="w-4 h-4 rtl:rotate-180" />
+                      إرسال <IconSend className="w-4 h-4 rtl:rotate-180" />
                     </>
                   )}
                 </button>
-                <p className="text-xs text-red-200 text-center mt-4">{D.contact.note}</p>
               </form>
             </section>
 
-            {/* Deliverables List */}
-            <section className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-              <h3 className="text-sm font-semibold text-red-700 mb-2 uppercase tracking-wide">
-                {D.deliverablesHeading}
-              </h3>
-              <p className="text-gray-500 text-xs leading-relaxed mb-5">
-                {D.deliverablesSubtitle}
-              </p>
-              <ul className="space-y-3">
-                {D.deliverables.map((d, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-gray-700 font-medium">
-                    <IconChevron className="w-4 h-4 text-red-600 rotate-180 shrink-0" />
-                    <span>{d}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
           </div>
         </div>
       </main>

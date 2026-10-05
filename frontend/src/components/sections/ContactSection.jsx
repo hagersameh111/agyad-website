@@ -29,8 +29,7 @@ const handleSubmit = async (e) => {
 
   try {
     const response = await fetch(
-      "https://YOUR-BACKEND-URL/api/contact",
-      {
+  "http://localhost:9000/api/contact",      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -96,8 +95,7 @@ const handleSubmit = async (e) => {
               </div>
               <div>
                 <h4 className="text-parchment font-bold text-lg mb-1">الهاتف</h4>
-                <p className="text-stone text-sm" dir="ltr">0580294230</p>
-                <p className="text-stone text-sm" dir="ltr">0595014299</p>
+                <p className="text-stone text-sm" dir="ltr">+966 59 501 4299</p>
               </div>
             </div>
 
@@ -173,12 +171,12 @@ href="https://maps.google.com/?q=CH2H+596+وكالة+باب+اجياد+للدع�
                 <div>
                   <label className="block text-stone text-sm mb-2 text-right">رقم الهاتف</label>
                  <input
-  type="text"
-  name="name"
-  value={formData.name}
+  type="tel"
+  name="phone"
+  value={formData.phone}
   onChange={handleChange}
-  placeholder="ادخل اسمك"
-  className="w-full bg-ink border border-ink-line rounded-lg px-4 py-3.5 text-parchment placeholder-stone/50 focus:outline-none focus:border-oxblood transition-colors"
+  placeholder="رقم هاتفك"
+  className="w-full bg-ink border border-ink-line rounded-lg px-4 py-3.5 text-parchment placeholder-stone/50 focus:outline-none focus:border-oxblood transition-colors text-right"
 />
                 </div>
                 <div>

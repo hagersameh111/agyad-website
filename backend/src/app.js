@@ -4,7 +4,7 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import serviceRoutes from "./modules/services/service.routes.js";
 import galleryRoutes from "./modules/gallery/gallery.routes.js";
 import projectRoutes from "./modules/projects/project.routes.js";
-
+import contactRoutes from "./routes/contact.routes.js";
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -18,6 +18,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/contact", contactRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);
